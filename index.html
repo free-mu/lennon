@@ -1,14 +1,894 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="zh-CN">
 <head>
-    <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
-    <title>My Web Page</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lennon | 后端开发工程师/全栈开发者</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- GSAP 动画库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- 自定义样式 -->
+    <style>
+        /* 基础样式 */
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            overflow-x: hidden;
+            cursor: none; /* 隐藏默认光标 */
+        }
+        
+        /* 自定义光标 */
+        .custom-cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.8);
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.2s ease, height 0.2s ease, opacity 0.2s ease, background-color 0.2s ease;
+            mix-blend-mode: difference;
+        }
+        
+        .custom-cursor.hover {
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .custom-cursor.click {
+            width: 15px;
+            height: 15px;
+            background-color: rgba(255, 255, 255, 1);
+        }
+        
+        /* 打字效果 */
+        .typing-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1.2em;
+            background-color: #fff;
+            margin-left: 4px;
+            animation: blink 0.7s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        
+        /* 导航栏滚动效果 */
+        .navbar {
+            transition: all 0.3s ease;
+        }
+        
+        .navbar.scrolled {
+            background-color: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* 视差滚动容器 */
+        .parallax-container {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .parallax-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            will-change: transform;
+        }
+        
+        /* 文字渐入动画 */
+        .text-reveal {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        
+        .text-reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* 字符动画 */
+        .char-animation span {
+            opacity: 0;
+            transform: translateY(20px);
+            display: inline-block;
+        }
+        
+        /* 技能卡片悬停效果 */
+        .skill-card {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+        
+        .skill-card:hover {
+            transform: translateY(-10px) rotateX(5deg);
+            box-shadow: 0 15px 30px rgba(255, 255, 255, 0.05);
+        }
+        
+        .skill-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: inherit;
+        }
+        
+        .skill-card:hover::before {
+            opacity: 1;
+        }
+        
+        /* 进度条动画 */
+        .progress-bar {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transform: translateX(-100%);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            100% {
+                transform: translateX(100%);
+            }
+        }
+        
+        /* 按钮悬停效果 */
+        .btn-hover {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-hover::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+        
+        .btn-hover:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn-hover span {
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* 滚动指示器 */
+        .scroll-indicator {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .scroll-indicator .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.3);
+            margin: 5px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .scroll-indicator .dot.active {
+            background-color: #fff;
+            width: 20px;
+            border-radius: 4px;
+        }
+        
+        /* 粒子背景容器 */
+        #particles-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        
+        /* 3D 卡片效果 */
+        .card-3d {
+            transform-style: preserve-3d;
+            transition: transform 0.6s ease;
+        }
+        
+        .card-3d:hover {
+            transform: rotateY(10deg) rotateX(5deg);
+        }
+        
+        /* 页面过渡动画 */
+        .page-transition {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .page-transition.active {
+            transform: translateX(0);
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .custom-cursor {
+                display: none;
+            }
+            
+            body {
+                cursor: auto;
+            }
+        }
+    </style>
 </head>
-
 <body>
-    <h1 id="title">My Web Page</h1>
-    <p id="paragraph">This is a paragraph.</p>
+    <!-- 自定义光标 -->
+    <div class="custom-cursor" id="customCursor"></div>
+    
+    <!-- 页面过渡动画 -->
+    <div class="page-transition" id="pageTransition"></div>
+    
+    <!-- 粒子背景 -->
+    <div id="particles-bg"></div>
+    
+    <!-- 导航栏 -->
+    <nav class="navbar fixed top-0 left-0 w-full py-4 z-50 px-6 md:px-12">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="#" class="text-xl font-light tracking-wider group">
+                <span class="group-hover:inline-block group-hover:animate-pulse">Lennon</span>
+                <span class="text-gray-400 group-hover:text-white transition-colors">/ 听澜</span>
+            </a>
+            
+            <!-- 桌面导航 -->
+            <div class="hidden md:flex space-x-12">
+                <a href="#hero" class="nav-link text-gray-400 hover:text-white transition-colors relative group">
+                    首页
+                    <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
+                </a>
+                <a href="#about" class="nav-link text-gray-400 hover:text-white transition-colors relative group">
+                    关于
+                    <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
+                </a>
+                <a href="#skills" class="nav-link text-gray-400 hover:text-white transition-colors relative group">
+                    技能
+                    <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
+                </a>
+            </div>
+            
+            <!-- 移动端菜单按钮 -->
+            <button id="menu-toggle" class="md:hidden text-white focus:outline-none">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+        </div>
+        
+        <!-- 移动端导航菜单 -->
+        <div id="mobile-menu" class="md:hidden bg-black bg-opacity-95 hidden absolute top-full left-0 w-full border-t border-gray-800">
+            <div class="container mx-auto px-6 py-4 flex flex-col space-y-4">
+                <a href="#hero" class="mobile-nav-link text-gray-400 hover:text-white transition-colors py-2">首页</a>
+                <a href="#about" class="mobile-nav-link text-gray-400 hover:text-white transition-colors py-2">关于</a>
+                <a href="#skills" class="mobile-nav-link text-gray-400 hover:text-white transition-colors py-2">技能</a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- 首页/英雄区 -->
+    <section id="hero" class="min-h-screen flex items-center justify-center px-6 md:px-12 relative overflow-hidden">
+        <!-- 视差背景元素 -->
+        <div class="parallax-container absolute inset-0">
+            <div class="parallax-layer" data-depth="0.05">
+                <div class="absolute top-1/4 left-1/4 text-[8vw] font-light opacity-5">CODE</div>
+            </div>
+            <div class="parallax-layer" data-depth="0.1">
+                <div class="absolute bottom-1/4 right-1/4 text-[6vw] font-light opacity-5">DEVELOPER</div>
+            </div>
+            <div class="parallax-layer" data-depth="0.15">
+                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-[12vw] font-light opacity-2">BACKEND</div>
+            </div>
+        </div>
+        
+        <div class="max-w-7xl mx-auto text-center relative z-10">
+            <h1 class="text-5xl md:text-7xl font-light mb-6 char-animation" id="heroTitle">
+                我是一名<span id="typing-text" class="font-normal"></span><span class="typing-cursor"></span>
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-400 max-w-2xl mx-auto mb-12 text-reveal">
+                专注于构建高效、可扩展的后端系统和全栈应用
+            </p>
+            <div class="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-6">
+                <a href="#about" class="px-8 py-3 border border-white hover:bg-white hover:text-black transition-colors duration-300 btn-hover">
+                    <span>了解更多</span>
+                </a>
+                <a href="#" id="resumeBtn" class="px-8 py-3 bg-white text-black hover:bg-gray-200 transition-colors duration-300 btn-hover">
+                    <span>下载简历</span>
+                </a>
+            </div>
+        </div>
+        
+        <!-- 向下滚动指示 -->
+        <div class="absolute bottom-12 left-1/2 transform -translate-x-1/2 animate-bounce">
+            <i class="fas fa-chevron-down text-gray-400"></i>
+        </div>
+    </section>
+    
+    <!-- 关于我区块 -->
+    <section id="about" class="py-24 px-6 md:px-12">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-3xl font-light mb-16 text-center text-reveal">关于我</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+                <div class="space-y-6">
+                    <div class="text-reveal">
+                        <p class="text-lg text-gray-300 leading-relaxed">
+                            作为一名资深后端开发工程师，我专注于构建高性能、可扩展的系统架构，拥有丰富的全栈开发经验。
+                        </p>
+                    </div>
+                    
+                    <div class="text-reveal" data-delay="200">
+                        <p class="text-lg text-gray-300 leading-relaxed">
+                            我热衷于解决复杂的技术挑战，并且善于将业务需求转化为优雅的技术解决方案。
+                        </p>
+                    </div>
+                    
+                    <div class="pt-8 border-t border-gray-800 text-reveal" data-delay="400">
+                        <h3 class="text-xl font-light mb-6">专业特长</h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-start group">
+                                <i class="fas fa-check-circle text-gray-400 mt-1 mr-4 group-hover:text-white transition-colors"></i>
+                                <span class="text-gray-300 group-hover:text-white transition-colors">后端系统架构设计与实现</span>
+                            </li>
+                            <li class="flex items-start group">
+                                <i class="fas fa-check-circle text-gray-400 mt-1 mr-4 group-hover:text-white transition-colors"></i>
+                                <span class="text-gray-300 group-hover:text-white transition-colors">高性能API开发与优化</span>
+                            </li>
+                            <li class="flex items-start group">
+                                <i class="fas fa-check-circle text-gray-400 mt-1 mr-4 group-hover:text-white transition-colors"></i>
+                                <span class="text-gray-300 group-hover:text-white transition-colors">数据库设计与性能调优</span>
+                            </li>
+                            <li class="flex items-start group">
+                                <i class="fas fa-check-circle text-gray-400 mt-1 mr-4 group-hover:text-white transition-colors"></i>
+                                <span class="text-gray-300 group-hover:text-white transition-colors">微服务架构与容器化部署</span>
+                            </li>
+                            <li class="flex items-start group">
+                                <i class="fas fa-check-circle text-gray-400 mt-1 mr-4 group-hover:text-white transition-colors"></i>
+                                <span class="text-gray-300 group-hover:text-white transition-colors">全栈应用开发与集成</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="text-reveal" data-delay="600">
+                    <div class="aspect-[4/5] overflow-hidden rounded-sm card-3d">
+                        <img src="https://picsum.photos/id/1/800/1000" alt="个人照片" class="w-full h-full object-cover">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- 技能区块 -->
+    <section id="skills" class="py-24 px-6 md:px-12 bg-gray-950">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-3xl font-light mb-16 text-center text-reveal">专业技能</h2>
+            
+            <div class="grid grid-cols-1 gap-8">
+                <div class="text-reveal">
+                    <h3 class="text-xl font-light mb-8 text-center">技术栈熟练度</h3>
+                    
+                    <!-- 技能网格布局 -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="skillsGrid">
+                        <!-- 技能卡片将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- 页脚 -->
+    <footer class="py-12 px-6 md:px-12 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto text-center">
+            <p class="text-gray-400">© 2025 Lennon. 保留所有权利。</p>
+        </div>
+    </footer>
+    
+    <!-- 滚动指示器 -->
+    <div class="scroll-indicator hidden md:block">
+        <div class="dot active" data-section="hero"></div>
+        <div class="dot" data-section="about"></div>
+        <div class="dot" data-section="skills"></div>
+    </div>
+    
+    <!-- JavaScript -->
+    <script>
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化GSAP插件
+            gsap.registerPlugin(ScrollTrigger);
+            
+            // 自定义光标
+            const customCursor = document.getElementById('customCursor');
+            
+            // 导航栏
+            const navbar = document.querySelector('.navbar');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+            const sections = document.querySelectorAll('section');
+            
+            // 移动端菜单
+            const menuToggle = document.getElementById('menu-toggle');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            // 下载简历按钮
+            const resumeBtn = document.getElementById('resumeBtn');
+            
+            // 打字效果
+            const typingText = document.getElementById('typing-text');
+            
+            // 滚动指示器
+            const scrollDots = document.querySelectorAll('.scroll-indicator .dot');
+            
+            // 视差背景
+            const parallaxLayers = document.querySelectorAll('.parallax-layer');
+            
+            // 页面过渡动画
+            const pageTransition = document.getElementById('pageTransition');
+            
+            // 技能数据
+            const skillCategories = [
+                { name: '后端开发', icon: 'server', skills: [
+                    { name: 'Java / Spring Boot', level: 90 },
+                    { name: 'Python / Django', level: 85 },
+                    { name: 'Node.js / Express', level: 80 }
+                ]},
+                { name: '数据库', icon: 'database', skills: [
+                    { name: 'MySQL / PostgreSQL', level: 95 },
+                    { name: 'MongoDB / Redis', level: 85 }
+                ]},
+                { name: '前端开发', icon: 'code', skills: [
+                    { name: 'HTML / CSS / JavaScript', level: 80 },
+                    { name: 'Vue.js / React', level: 75 }
+                ]},
+                { name: '系统架构', icon: 'cubes', skills: [
+                    { name: '微服务架构', level: 85 },
+                    { name: '分布式系统', level: 80 }
+                ]},
+                { name: 'DevOps', icon: 'terminal', skills: [
+                    { name: 'Docker / Kubernetes', level: 75 },
+                    { name: 'CI/CD 流程', level: 80 }
+                ]},
+                { name: 'API设计', icon: 'exchange-alt', skills: [
+                    { name: 'RESTful API', level: 90 },
+                    { name: 'GraphQL', level: 70 }
+                ]}
+            ];
+            
+            // 页面加载动画
+            setTimeout(() => {
+                pageTransition.classList.add('active');
+                setTimeout(() => {
+                    pageTransition.style.transform = 'translateX(-100%)';
+                }, 500);
+            }, 300);
+            
+            // 自定义光标效果
+            document.addEventListener('mousemove', function(e) {
+                customCursor.style.left = e.clientX + 'px';
+                customCursor.style.top = e.clientY + 'px';
+            });
+            
+            // 鼠标悬停在交互元素上时的效果
+            const interactiveElements = document.querySelectorAll('a, button, .skill-card, .nav-link, .mobile-nav-link');
+            interactiveElements.forEach(element => {
+                element.addEventListener('mouseenter', function() {
+                    customCursor.classList.add('hover');
+                });
+                
+                element.addEventListener('mouseleave', function() {
+                    customCursor.classList.remove('hover');
+                });
+                
+                element.addEventListener('mousedown', function() {
+                    customCursor.classList.add('click');
+                });
+                
+                element.addEventListener('mouseup', function() {
+                    customCursor.classList.remove('click');
+                });
+            });
+            
+            // 打字效果实现
+            const typingEffect = (element, words, typingSpeed = 100, pauseTime = 1000) => {
+                let wordIndex = 0;
+                let charIndex = 0;
+                let isDeleting = false;
+            
+                function type() {
+                    const currentWord = words[wordIndex];
+                
+                    if (isDeleting) {
+                        // 删除字符
+                        element.textContent = currentWord.substring(0, charIndex - 1);
+                        charIndex--;
+                    } else {
+                        // 添加字符
+                        element.textContent = currentWord.substring(0, charIndex + 1);
+                        charIndex++;
+                    }
+                
+                    // 处理删除/添加状态转换
+                    if (!isDeleting && charIndex === currentWord.length) {
+                        isDeleting = true;
+                        setTimeout(type, pauseTime); // 完成单词后暂停
+                    } else if (isDeleting && charIndex === 0) {
+                        isDeleting = false;
+                        wordIndex = (wordIndex + 1) % words.length; // 循环切换单词
+                        setTimeout(type, 200); // 短暂暂停后开始新单词
+                    } else {
+                        // 继续当前操作
+                        setTimeout(type, isDeleting ? typingSpeed/2 : typingSpeed);
+                    }
+                }
+            
+                type(); // 启动动画
+            };
+            
+            // 初始化打字效果
+            typingEffect(
+                typingText,
+                ['后端开发工程师', '全栈开发者', '系统架构师', '技术解决方案专家'],
+                80, 
+                1000
+            );
+            
+            // 字符动画效果
+            function animateChars() {
+                const title = document.getElementById('heroTitle');
+                const text = title.textContent;
+                title.innerHTML = '';
+                
+                for (let i = 0; i < text.length; i++) {
+                    const span = document.createElement('span');
+                    span.textContent = text[i];
+                    span.style.transitionDelay = `${i * 0.03}s`;
+                    title.appendChild(span);
+                }
+                
+                // 触发动画
+                setTimeout(() => {
+                    const spans = title.querySelectorAll('span');
+                    spans.forEach((span, index) => {
+                        setTimeout(() => {
+                            span.style.opacity = '1';
+                            span.style.transform = 'translateY(0)';
+                        }, index * 30);
+                    });
+                }, 100);
+            }
+            
+            // 导航栏滚动效果
+            window.addEventListener('scroll', function() {
+                // 导航栏背景透明度变化
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+                
+                // 高亮当前区域对应的导航链接
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    const sectionHeight = section.clientHeight;
+                    if (window.scrollY >= sectionTop - 200) {
+                        current = section.getAttribute('id');
+                    }
+                });
+                
+                navLinks.forEach(link => {
+                    link.classList.remove('text-white');
+                    link.classList.add('text-gray-400');
+                    if (link.getAttribute('href').substring(1) === current) {
+                        link.classList.remove('text-gray-400');
+                        link.classList.add('text-white');
+                    }
+                });
+                
+                mobileNavLinks.forEach(link => {
+                    link.classList.remove('text-white');
+                    link.classList.add('text-gray-400');
+                    if (link.getAttribute('href').substring(1) === current) {
+                        link.classList.remove('text-gray-400');
+                        link.classList.add('text-white');
+                    }
+                });
+                
+                // 更新滚动指示器
+                scrollDots.forEach(dot => {
+                    dot.classList.remove('active');
+                    if (dot.getAttribute('data-section') === current) {
+                        dot.classList.add('active');
+                    }
+                });
+                
+                // 视差滚动效果
+                parallaxLayers.forEach(layer => {
+                    const depth = parseFloat(layer.getAttribute('data-depth'));
+                    const movement = -(window.scrollY * depth);
+                    layer.style.transform = `translate3d(0, ${movement}px, 0)`;
+                });
+            });
+            
+            // 移动端菜单切换
+            menuToggle.addEventListener('click', function() {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            // 点击移动端导航链接后关闭菜单
+            mobileNavLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    mobileMenu.classList.add('hidden');
+                });
+            });
+            
+            // 下载简历按钮
+            resumeBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // 创建波纹效果
+                const ripple = document.createElement('div');
+                ripple.classList.add('absolute', 'rounded-full', 'bg-white', 'opacity-30', 'transform', 'scale-0');
+                ripple.style.width = '100px';
+                ripple.style.height = '100px';
+                ripple.style.top = '50%';
+                ripple.style.left = '50%';
+                ripple.style.transform = 'translate(-50%, -50%) scale(0)';
+                ripple.style.animation = 'ripple 0.6s linear';
+                
+                this.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                    alert('简历下载功能将在此处实现');
+                }, 600);
+            });
+            
+            // 添加波纹动画CSS
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes ripple {
+                    to {
+                        transform: translate(-50%, -50%) scale(4);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // 页面滚动动画
+            const animateOnScroll = function() {
+                const elements = document.querySelectorAll('.text-reveal');
+                
+                elements.forEach(element => {
+                    const elementPosition = element.getBoundingClientRect().top;
+                    const windowHeight = window.innerHeight;
+                    const delay = element.getAttribute('data-delay') || 0;
+                    
+                    if (elementPosition < windowHeight - 100) {
+                        setTimeout(() => {
+                            element.classList.add('active');
+                        }, delay);
+                    }
+                });
+            };
+            
+            // 初始执行一次
+            animateOnScroll();
+            
+            // 滚动时执行
+            window.addEventListener('scroll', animateOnScroll);
+            
+            // 生成技能卡片
+            function generateSkillCards() {
+                const skillsGrid = document.getElementById('skillsGrid');
+                
+                skillCategories.forEach(category => {
+                    const card = document.createElement('div');
+                    card.className = 'skill-card p-6 border border-gray-800 rounded-sm relative overflow-hidden';
+                    
+                    card.innerHTML = `
+                        <h4 class="text-lg font-light mb-4 flex items-center">
+                            <i class="fas fa-${category.icon} mr-3 text-gray-400"></i>
+                            ${category.name}
+                        </h4>
+                        <div class="space-y-4">
+                            ${category.skills.map(skill => `
+                                <div>
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm text-gray-400">${skill.name}</span>
+                                        <span class="text-sm text-gray-400">${skill.level}%</span>
+                                    </div>
+                                    <div class="h-1 bg-gray-800 overflow-hidden">
+                                        <div class="h-full bg-white progress-bar" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                    
+                    skillsGrid.appendChild(card);
+                });
+                
+                // 为进度条添加动画
+                gsap.utils.toArray('.skill-card').forEach((card, i) => {
+                    ScrollTrigger.create({
+                        trigger: card,
+                        start: 'top 80%',
+                        onEnter: () => {
+                            const progressBars = card.querySelectorAll('.progress-bar');
+                            progressBars.forEach((bar, index) => {
+                                const level = parseInt(bar.parentElement.previousElementSibling.querySelector('span:last-child').textContent);
+                                gsap.to(bar, {
+                                    width: `${level}%`,
+                                    duration: 1,
+                                    delay: index * 0.2,
+                                    ease: 'power2.out'
+                                });
+                            });
+                        }
+                    });
+                });
+            }
+            
+            // 初始化技能卡片
+            generateSkillCards();
+            
+            // 平滑滚动
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    
+                    if (targetElement) {
+                        gsap.to(window, {
+                            duration: 1,
+                            scrollTo: {
+                                y: targetElement.offsetTop - 80,
+                                autoKill: true
+                            },
+                            ease: 'power2.inOut'
+                        });
+                    }
+                });
+            });
+            
+            // 初始化Three.js粒子背景
+            initParticlesBackground();
+            
+            // 初始化字符动画
+            animateChars();
+        });
+        
+        // Three.js粒子背景
+        function initParticlesBackground() {
+            const container = document.getElementById('particles-bg');
+            
+            // 创建场景
+            const scene = new THREE.Scene();
+            
+            // 创建相机
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 30;
+            
+            // 创建渲染器
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+            
+            // 创建粒子
+            const particlesGeometry = new THREE.BufferGeometry();
+            const particlesCount = 1500;
+            
+            const posArray = new Float32Array(particlesCount * 3);
+            
+            for (let i = 0; i < particlesCount * 3; i++) {
+                posArray[i] = (Math.random() - 0.5) * 100;
+            }
+            
+            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            
+            // 创建材质
+            const particlesMaterial = new THREE.PointsMaterial({
+                size: 0.2,
+                color: 0xffffff,
+                transparent: true,
+                opacity: 0.8
+            });
+            
+            // 创建粒子系统
+            const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+            scene.add(particlesMesh);
+            
+            // 鼠标移动效果
+            let mouseX = 0;
+            let mouseY = 0;
+            
+            document.addEventListener('mousemove', (event) => {
+                mouseX = event.clientX / window.innerWidth - 0.5;
+                mouseY = event.clientY / window.innerHeight - 0.5;
+            });
+            
+            // 动画循环
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                particlesMesh.rotation.y += 0.001;
+                particlesMesh.rotation.x += 0.0005;
+                
+                // 根据鼠标位置影响粒子旋转
+                particlesMesh.rotation.y += mouseX * 0.01;
+                particlesMesh.rotation.x += mouseY * 0.01;
+                
+                renderer.render(scene, camera);
+            }
+            
+            // 窗口大小调整
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+            
+            animate();
+        }
+    </script>
 </body>
-
 </html>
